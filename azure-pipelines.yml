@@ -1,0 +1,99 @@
+trigger:
+- main
+
+pool:
+  vmImage: 'ubuntu-latest'
+
+variables:
+  - group: 'my-variable-group'
+
+stages:
+- stage: Static_Code_Analysis
+  displayName: 'Static Code Analysis'
+  jobs:
+  - job: Code_Analysis
+    displayName: 'Code Analysis'
+    steps:
+      - script: echo 'Running code analysis...'
+        displayName: 'Run Code Analysis'
+
+- stage: Infrastructure_Deployment
+  displayName: 'Infrastructure Deployment'
+  dependsOn: Static_Code_Analysis
+  jobs:
+  - job: Infrastructure_Deployment
+    displayName: 'Deploy Infrastructure'
+    steps:
+      - task: TerraformInstaller@0
+        displayName: 'Install Terraform'
+        inputs:
+          terraformVersion: '1.1.0'
+      - script: |
+          cd terraform
+          terraform init
+          terraform validate
+          terraform plan -out=tfplan
+        displayName: 'Initialize Terraform and Create Plan'
+        workingDirectory: '$(System.DefaultWorkingDirectory)'
+      - task: TerraformCLI@0
+        displayName: 'Apply Infrastructure Changes'
+        inputs:
+          command: 'apply'
+          commandOptions: '-auto-approve -input=false'
+          environmentServiceNameAzureRM: 'my-terraform-spn'
+          workingDirectory: '$(System.DefaultWorkingDirectory)/terraform'
+        enabled: ${{ eq(variables['Environment'], 'Production') }}
+
+- stage: Build_And_Publish
+  displayName: 'Build and Publish'
+  dependsOn: Infrastructure_Deployment
+  jobs:
+  - job: React_Build_And_Publish
+    displayName: 'React Build and Publish'
+    steps:
+      - task: NodeTool@0
+        displayName: 'Install Node.js'
+        inputs:
+          versionSpec: '14.x'
+        enabled: ${{ eq(variables['Build.Repository.Name'], 'my-react-repo') }}
+      - script: |
+          cd react-app
+          npm install
+          npm run build
+        displayName: 'Build React App'
+        workingDirectory: '$(System.DefaultWorkingDirectory)'
+        enabled: ${{ eq(variables['Build.Repository.Name'], 'my-react-repo') }}
+      - task: Docker@2
+        displayName: 'Build and Push React Container'
+        inputs:
+          command: 'buildAndPush'
+          containerRegistry: 'my-acr'
+          repository: 'my-react-repo'
+          dockerfile: 'react-app/Dockerfile'
+          tags: |
+            $(Build.BuildId)
+            latest
+        enabled: ${{ eq(variables['Build.Repository.Name'], 'my-react-repo') }}
+  - job: SpringBoot_Build_And_Publish
+    displayName: 'SpringBoot Build and Publish'
+    steps:
+      - task: JavaToolInstaller@0
+        displayName: 'Install JDK 11'
+        inputs:
+          versionSpec: '11'
+          jdkArchitectureOption: 'x64'
+      - task: Maven@3
+        displayName: 'Build SpringBoot App'
+        inputs:
+          mavenPomFile: 'spring-boot-app/pom.xml'
+          goals: 'clean package'
+          mavenOptions: '-Xmx3072m'
+          publishJUnitResults: true
+          testResultsFiles: '**/surefire-reports/TEST-*.xml'
+        workingDirectory: '$(System.DefaultWorkingDirectory)'
+      - task: Docker@2
+        displayName: 'Build and Push SpringBoot Container'
+        inputs:
+          command: 'buildAndPush'
+          containerRegistry: 'my-acr'
+          repository: 'my-s

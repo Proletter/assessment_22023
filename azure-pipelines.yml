@@ -72,8 +72,6 @@ steps:
       provider: 'azurerm'
       command: 'init'
       workingDirectory: '$(terraformFolder)'
-      command: 'init'
-      workingDirectory: '$(terraformFolder)'
       backendServiceArm: "$(cat backend-config.txt)"
       # backendAzureRmStorageAccountName: '$(tf-backend-sa-name)'
       # backendAzureRmContainerName: '$(tf-backend-container-name)'

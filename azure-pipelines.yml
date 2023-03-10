@@ -63,13 +63,13 @@ steps:
         echo "##vso[task.publishpipelineartifact artifactname=backend-config; artifacttype=container;]$(pwd)/backend-config.txt"
     
     
-  - task: TerraformTaskV4@4
+  - task: TerraformTaskV1@0
     displayName: Terraform init
     inputs:
       provider: 'azurerm'
       command: 'init'
       workingDirectory: '$(terraformFolder)'
-      backendServiceArm: "$(cat $(Build.ArtifactStagingDirectory)/backend-config.txt)"
+      backendServiceArm: '$(Pipeline.Workspace)/backend-config.txt'
   #     # backendAzureRmStorageAccountName: '$(tf-backend-sa-name)'
   #     # backendAzureRmContainerName: '$(tf-backend-container-name)'
   #     # backendAzureRmKey: '$(tf-backend-key)'

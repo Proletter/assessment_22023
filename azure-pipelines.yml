@@ -1,87 +1,95 @@
+# azure-pipelines.yml
+variables:
+  - group: azure-devops
+  - name: terraformFolder
+    value: terraform
+  - name: imageRepository
+    value: azure-container-registry-name.azurecr.io
+  - name: imageName
+    value: react-app
+  - name: imageTag
+    value: $(Build.BuildId)
+  
 trigger:
-- main
+  - main
 
 pool:
-  vmImage: 'ubuntu-latest'
-
-variables:
-  acrName: 'your-acr-name'
-  imageRepository: 'your-image-repository'
-  containerRegistry: 'your-container-registry-name'
-  containerRegistryConnection: 'your-container-registry-connection-name'
-  tfstateStorageAccountName: 'your-storage-account-name'
-  tfstateContainerName: 'your-storage-container-name'
-  resourceGroupName: 'your-resource-group-name'
-  location: 'your-location'
+  vmImage: ubuntu-latest
 
 steps:
-- task: TerraformInstaller@0
-  displayName: 'Install Terraform'
-  inputs:
-    terraformVersion: '1.1.2'
+  - task: UsePythonVersion@0
+    inputs:
+      versionSpec: '3.9'
+      architecture: 'x64'
+  
+  - task: TerraformInstaller@0
+    displayName: Install Terraform
+    inputs:
+      terraformVersion: '1.1.4'
 
-- task: TerraformTaskV1@0
-  displayName: 'Terraform Init'
-  inputs:
-    provider: 'azurerm'
-    command: 'init'
-    workingDirectory: './terraform'
-    backendServiceArm: '$(tfstateStorageAccountName)'
-    backendAzureRmResourceGroupName: '$(resourceGroupName)'
-    backendAzureRmStorageAccountName: '$(tfstateStorageAccountName)'
-    backendAzureRmContainerName: '$(tfstateContainerName)'
-    backendAzureRmKey: 'terraform.tfstate'
+  - task: TerraformTaskV1@0
+    displayName: Terraform init
+    inputs:
+      provider: 'azurerm'
+      command: 'init'
+      workingDirectory: '$(terraformFolder)'
+      
+  - task: TerraformTaskV1@0
+    displayName: Terraform validate
+    inputs:
+      provider: 'azurerm'
+      command: 'validate'
+      workingDirectory: '$(terraformFolder)'
+      
+  - task: TerraformTaskV1@0
+    displayName: Terraform plan
+    inputs:
+      provider: 'azurerm'
+      command: 'plan'
+      environmentServiceNameAzureRM: 'my-azure-rm-connection'
+      workingDirectory: '$(terraformFolder)'
 
-- task: TerraformTaskV1@0
-  displayName: 'Terraform Plan'
-  inputs:
-    provider: 'azurerm'
-    command: 'plan'
-    workingDirectory: './terraform'
-    environmentServiceNameAzureRM: '$(terraformServiceConnection)'
-    commandOptions: '-var resource_group_name=$(resourceGroupName) -var location=$(location)'
-    enableTerraformInit: false
+  - task: TerraformTaskV1@0
+    displayName: Terraform apply
+    inputs:
+      provider: 'azurerm'
+      command: 'apply'
+      environmentServiceNameAzureRM: 'my-azure-rm-connection'
+      workingDirectory: '$(terraformFolder)'
+      args: '-auto-approve'
 
-- task: TerraformTaskV1@0
-  displayName: 'Terraform Apply'
-  inputs:
-    provider: 'azurerm'
-    command: 'apply'
-    workingDirectory: './terraform'
-    environmentServiceNameAzureRM: '$(terraformServiceConnection)'
-    commandOptions: '-var resource_group_name=$(resourceGroupName) -var location=$(location) -auto-approve'
-    enableTerraformInit: false
+  - task: NodeTool@0
+    displayName: Install Node.js
+    inputs:
+      versionSpec: '16.x'
 
-- task: Docker@2
-  displayName: 'Build and Push Docker image - React app'
-  inputs:
-    command: 'buildAndPush'
-    containerRegistry: '$(containerRegistry)'
-    repository: '$(imageRepository)/react-app'
-    Dockerfile: '$(System.DefaultWorkingDirectory)/react-app/Dockerfile'
-    buildContext: '$(System.DefaultWorkingDirectory)/react-app'
-    tags: '$(Build.BuildId)'
-    arguments: '--label "build-date=$(Build.Date)"'
+  - script: |
+      npm install
+    displayName: Install app dependencies
 
-- task: Docker@2
-  displayName: 'Build and Push Docker image - Spring Boot app'
-  inputs:
-    command: 'buildAndPush'
-    containerRegistry: '$(containerRegistry)'
-    repository: '$(imageRepository)/spring-boot-app'
-    Dockerfile: '$(System.DefaultWorkingDirectory)/spring-boot-app/Dockerfile'
-    buildContext: '$(System.DefaultWorkingDirectory)/spring-boot-app'
-    tags: '$(Build.BuildId)'
-    arguments: '--label "build-date=$(Build.Date)"'
+  - script: |
+      npm run test
+    displayName: Test app
 
-- task: AzureCLI@2
-  displayName: 'Deploy containers to AKS'
-  inputs:
-    azureSubscription: 'your-azure-subscription'
-    scriptType: 'bash'
-    scriptLocation: 'inlineScript'
-    inlineScript: |
-      az aks get-credentials --resource-group $(resourceGroupName) --name $(aksName)
-      kubectl apply -f kubernetes/react-deployment.yaml
-      kubectl apply -f kubernetes/react-service.yaml
-      kubectl apply -f kubernetes
+  - script: |
+      npm run build
+    displayName: Build app
+
+  - task: Docker@2
+    displayName: Build Docker image
+    inputs:
+      containerRegistry: $(azure-container-registry-name)
+      repository: $(imageRepository)/$(imageName)
+      command: build
+      Dockerfile: $(System.DefaultWorkingDirectory)/Dockerfile
+      tags: |
+        $(imageTag)
+
+  - task: Docker@2
+    displayName: Push Docker image
+    inputs:
+      containerRegistry: $(azure-container-registry-name)
+      repository: $(imageRepository)/$(imageName)
+      command: push
+      tags: |
+        $(imageTag)

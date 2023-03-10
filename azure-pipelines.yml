@@ -60,7 +60,7 @@ steps:
         echo "  storage_account_name = \"$storageAccountName\"" >> $(Build.ArtifactStagingDirectory)/backend-config.txt
         echo "  container_name = \"$containerName\"" >> $(Build.ArtifactStagingDirectory)/backend-config.txt
         echo "  key = \"terraform.tfstate\"" >> $(Build.ArtifactStagingDirectory)/backend-config.txt
-        echo "}" >> $(Build.ArtifactStagingDirectory)/backend-config.txt
+        echo "##vso[task.publishpipelineartifact artifactname=backend-config; artifacttype=container;]$(pwd)/backend-config.txt"
     
     
   - task: TerraformTaskV4@4

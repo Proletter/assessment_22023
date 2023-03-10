@@ -10,7 +10,7 @@ variables:
     value: $(Build.BuildId)
   
 trigger:
-  - main
+  - master
 
 pool:
   vmImage: ubuntu-latest

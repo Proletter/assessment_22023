@@ -35,41 +35,65 @@ steps:
     inputs:
       terraformVersion: '1.1.4'
   
+  
   - task: Bash@3
-    displayName: 'Create Terraform backend resources'
+    displayName: 'Create backend resources'
     inputs:
       targetType: 'inline'
       script: |
+        #!/bin/bash
         # Set variables
-        resourceGroup=<your-resource-group>
-        storageAccountName=<your-storage-account-name>
-        containerName=<your-container-name>
-
+        RESOURCE_GROUP="<your-resource-group>"
+        STORAGE_ACCOUNT="<your-storage-account-name>"
+        CONTAINER="<your-container-name>"
+        LOCATION="eastus2"
+        
         # Create resource group if it doesn't exist
-        az group create --name $resourceGroup --location eastus2
-
-        # Create storage account
-        az storage account create --name $storageAccountName --resource-group $resourceGroup --sku Standard_LRS --encryption-services blob --location eastus2
-
-        # Create container for Terraform state file
-        az storage container create --account-name $storageAccountName --account-key $(az storage account keys list --resource-group $resourceGroup --account-name $storageAccountName --query '[0].value' -o tsv) --name $containerName
-
+        if [ $(az group exists -n $RESOURCE_GROUP) = false ]; then
+          az group create -n $RESOURCE_GROUP -l $LOCATION
+        fi
+        
+        # Create storage account if it doesn't exist
+        if [ $(az storage account check-name -n $STORAGE_ACCOUNT --query "nameAvailable") = true ]; then
+          az storage account create -n $STORAGE_ACCOUNT -g $RESOURCE_GROUP --sku Standard_LRS --encryption-services blob
+        fi
+        
+        # Create container if it doesn't exist
+        if [ $(az storage container exists -n $CONTAINER --account-name $STORAGE_ACCOUNT --account-key $(az storage account keys list --resource-group $RESOURCE_GROUP --account-name $STORAGE_ACCOUNT --query '[0].value' -o tsv) --query "exists") = false ]; then
+          az storage container create -n $CONTAINER --account-name $STORAGE_ACCOUNT --account-key $(az storage account keys list --resource-group $RESOURCE_GROUP --account-name $STORAGE_ACCOUNT --query '[0].value' -o tsv)
+        fi
+        
         # Output Terraform backend configuration
-        echo "backend \"azurerm\" {" > $(Build.ArtifactStagingDirectory)/backend-config.txt
-        echo "  resource_group_name = \"$resourceGroup\"" >> $(Build.ArtifactStagingDirectory)/backend-config.txt
-        echo "  storage_account_name = \"$storageAccountName\"" >> $(Build.ArtifactStagingDirectory)/backend-config.txt
-        echo "  container_name = \"$containerName\"" >> $(Build.ArtifactStagingDirectory)/backend-config.txt
-        echo "  key = \"terraform.tfstate\"" >> $(Build.ArtifactStagingDirectory)/backend-config.txt
-        echo "##vso[task.publishpipelineartifact artifactname=backend-config; artifacttype=container;]$(pwd)/backend-config.txt"
-    
-    
+        echo "backend \"azurerm\" {" > backend-config.txt
+        echo "  resource_group_name = \"$RESOURCE_GROUP\"" >> backend-config.txt
+        echo "  storage_account_name = \"$STORAGE_ACCOUNT\"" >> backend-config.txt
+        echo "  container_name = \"$CONTAINER\"" >> backend-config.txt
+        echo "  key = \"terraform.tfstate\"" >> backend-config.txt
+        echo "}" >> backend-config.txt
+        
+        cat backend-config.txt
+
+  - task: PublishBuildArtifacts@1
+    displayName: 'Publish backend config'
+    inputs:
+      PathtoPublish: '$(System.DefaultWorkingDirectory)/backend-config.txt'
+      ArtifactName: 'backend-config'
+      publishLocation: 'Container'
+
   - task: TerraformTaskV1@0
-    displayName: Terraform init
+    displayName: 'Terraform init'
     inputs:
       provider: 'azurerm'
       command: 'init'
-      workingDirectory: '$(terraformFolder)'
       backendServiceArm: '$(Pipeline.Workspace)/backend-config.txt'
+      workingDirectory: '$(System.DefaultWorkingDirectory)/terraform'
+  # - task: TerraformTaskV1@0
+  #   displayName: Terraform init
+  #   inputs:
+  #     provider: 'azurerm'
+  #     command: 'init'
+  #     workingDirectory: '$(terraformFolder)'
+  #     backendServiceArm: '$(Pipeline.Workspace)/backend-config.txt'
   #     # backendAzureRmStorageAccountName: '$(tf-backend-sa-name)'
   #     # backendAzureRmContainerName: '$(tf-backend-container-name)'
   #     # backendAzureRmKey: '$(tf-backend-key)'

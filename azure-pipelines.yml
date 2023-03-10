@@ -67,7 +67,6 @@ steps:
     displayName: 'Create Terraform backend'
     name: 'Create Terraform backend'
   - task: TerraformTaskV1@0
-    dependsOn: Create Terraform backend
     displayName: Terraform init
     inputs:
       provider: 'azurerm'
@@ -77,6 +76,7 @@ steps:
       # backendAzureRmStorageAccountName: '$(tf-backend-sa-name)'
       # backendAzureRmContainerName: '$(tf-backend-container-name)'
       # backendAzureRmKey: '$(tf-backend-key)'
+    # dependsOn: Create Terraform backend
   - task: TerraformTaskV1@0
     displayName: Terraform validate
     inputs:

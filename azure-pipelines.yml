@@ -39,6 +39,7 @@ steps:
     inputs:
       azureSubscription: '$(service-connection)'
       ScriptType: 'InlineScript'
+      azurePowerShellVersion: LatestVersion
       Inline: |
         $resourceGroupName = '$(ResourceGroupName)'
         $storageAccountName = '$(StorageAccountName)'

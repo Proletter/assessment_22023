@@ -65,8 +65,10 @@ steps:
         
         cat backend-config.txt
     displayName: 'Create Terraform backend'
-    name: 'Create Terraform backend'
-  - task: TerraformTaskV1@0
+    name: 'Create_Terraform_backend'
+    
+    
+  - task: TerraformTaskV4@4
     displayName: Terraform init
     inputs:
       provider: 'azurerm'

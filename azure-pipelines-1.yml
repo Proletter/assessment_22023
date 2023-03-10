@@ -1,6 +1,5 @@
 # azure-pipelines.yml
 variables:
-  - group: azure-devops
   - name: terraformFolder
     value: terraform
   - name: imageRepository

@@ -16,7 +16,8 @@ variables:
     value : oluwaseunstrg
   - name: ContainerName
     value: oluwaseuncontainer
-  
+  - name: Location
+    value: "eastus-2"
 trigger:
   - master
 
@@ -63,9 +64,7 @@ steps:
         echo "}" >> backend-config.txt
         
         cat backend-config.txt
-    name: 'Create Terraform backend'
-    arguments: '--Location "$(Location)" --ResourceGroupName "$(ResourceGroupName)" --StorageAccountName "$(StorageAccountName)" --ContainerName "$(ContainerName)"'
-
+    displayName: 'Create Terraform backend'
   - task: TerraformTaskV1@0
     displayName: Terraform init
     inputs:

@@ -68,73 +68,73 @@ steps:
     name: 'Create_Terraform_backend'
     
     
-  - task: TerraformTaskV4@4
-    displayName: Terraform init
-    inputs:
-      provider: 'azurerm'
-      command: 'init'
-      workingDirectory: '$(terraformFolder)'
-      backendServiceArm: "$(cat backend-config.txt)"
-      # backendAzureRmStorageAccountName: '$(tf-backend-sa-name)'
-      # backendAzureRmContainerName: '$(tf-backend-container-name)'
-      # backendAzureRmKey: '$(tf-backend-key)'
-    # dependsOn: Create Terraform backend
-  - task: TerraformTaskV1@0
-    displayName: Terraform validate
-    inputs:
-      provider: 'azurerm'
-      command: 'validate'
-      workingDirectory: '$(terraformFolder)'
+  # - task: TerraformTaskV4@4
+  #   displayName: Terraform init
+  #   inputs:
+  #     provider: 'azurerm'
+  #     command: 'init'
+  #     workingDirectory: '$(terraformFolder)'
+  #     backendServiceArm: "$(cat backend-config.txt)"
+  #     # backendAzureRmStorageAccountName: '$(tf-backend-sa-name)'
+  #     # backendAzureRmContainerName: '$(tf-backend-container-name)'
+  #     # backendAzureRmKey: '$(tf-backend-key)'
+  #   # dependsOn: Create Terraform backend
+  # - task: TerraformTaskV1@0
+  #   displayName: Terraform validate
+  #   inputs:
+  #     provider: 'azurerm'
+  #     command: 'validate'
+  #     workingDirectory: '$(terraformFolder)'
       
-  - task: TerraformTaskV1@0
-    displayName: Terraform plan
-    inputs:
-      provider: 'azurerm'
-      command: 'plan'
-      environmentServiceNameAzureRM: '$(service-connection)'
-      workingDirectory: '$(terraformFolder)'
-
-  - task: TerraformTaskV1@0
-    displayName: Terraform apply
-    inputs:
-      provider: 'azurerm'
-      command: 'apply'
-      environmentServiceNameAzureRM: '$(service-connection)'
-      workingDirectory: '$(terraformFolder)'
-      args: '-auto-approve'
-
-  - task: NodeTool@0
-    displayName: Install Node.js
-    inputs:
-      versionSpec: '16.x'
-
-  - script: |
-      npm install
-    displayName: Install app dependencies
-
-  - script: |
-      npm run test
-    displayName: Test app
-
-  - script: |
-      npm run build
-    displayName: Build app
-
-  # - task: Docker@2
-  #   displayName: Build Docker image
+  # - task: TerraformTaskV1@0
+  #   displayName: Terraform plan
   #   inputs:
-  #     containerRegistry: $(azure-container-registry-name)
-  #     repository: $(imageRepository)/$(imageName)
-  #     command: build
-  #     Dockerfile: $(System.DefaultWorkingDirectory)/Dockerfile
-  #     tags: |
-  #       $(imageTag)
+  #     provider: 'azurerm'
+  #     command: 'plan'
+  #     environmentServiceNameAzureRM: '$(service-connection)'
+  #     workingDirectory: '$(terraformFolder)'
 
-  # - task: Docker@2
-  #   displayName: Push Docker image
+  # - task: TerraformTaskV1@0
+  #   displayName: Terraform apply
   #   inputs:
-  #     containerRegistry: $(azure-container-registry-name)
-  #     repository: $(imageRepository)/$(imageName)
-  #     command: push
-  #     tags: |
-  #       $(imageTag)
+  #     provider: 'azurerm'
+  #     command: 'apply'
+  #     environmentServiceNameAzureRM: '$(service-connection)'
+  #     workingDirectory: '$(terraformFolder)'
+  #     args: '-auto-approve'
+
+  # - task: NodeTool@0
+  #   displayName: Install Node.js
+  #   inputs:
+  #     versionSpec: '16.x'
+
+  # - script: |
+  #     npm install
+  #   displayName: Install app dependencies
+
+  # - script: |
+  #     npm run test
+  #   displayName: Test app
+
+  # - script: |
+  #     npm run build
+  #   displayName: Build app
+
+  # # - task: Docker@2
+  # #   displayName: Build Docker image
+  # #   inputs:
+  # #     containerRegistry: $(azure-container-registry-name)
+  # #     repository: $(imageRepository)/$(imageName)
+  # #     command: build
+  # #     Dockerfile: $(System.DefaultWorkingDirectory)/Dockerfile
+  # #     tags: |
+  # #       $(imageTag)
+
+  # # - task: Docker@2
+  # #   displayName: Push Docker image
+  # #   inputs:
+  # #     containerRegistry: $(azure-container-registry-name)
+  # #     repository: $(imageRepository)/$(imageName)
+  # #     command: push
+  # #     tags: |
+  # #       $(imageTag)

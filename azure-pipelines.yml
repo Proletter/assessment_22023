@@ -8,6 +8,14 @@ variables:
     value: react-app
   - name: imageTag
     value: $(Build.BuildId)
+  - name: service-connection
+    value: assessment
+  - name: ResourceGroupName
+    value: oluseungrpnew
+  - name: StorageAccountName
+    value : oluwaseunstrg
+  - name: ContainerName
+    value: oluwaseuncontainer
   
 trigger:
   - master
@@ -25,6 +33,38 @@ steps:
     displayName: Install Terraform
     inputs:
       terraformVersion: '1.1.4'
+  
+  - task: AzureCLI@2
+    inputs:
+      azureSubscription: $(service-connection)
+      scriptType: 'bash'
+      scriptLocation: 'inlineScript'
+      inlineScript: |
+        # Set variables
+        resourceGroup=$(ResourceGroupName)
+        storageAccountName=$(StorageAccountName)
+        containerName=$(ContainerName)
+        
+        # Create resource group if it doesn't exist
+        az group create --name $resourceGroup --location $(Location)
+        
+        # Create storage account
+        az storage account create --name $storageAccountName --resource-group $resourceGroup --sku Standard_LRS --encryption-services blob
+        
+        # Create container for Terraform state file
+        az storage container create --account-name $storageAccountName --account-key $(az storage account keys list --resource-group $resourceGroup --account-name $storageAccountName --query '[0].value' -o tsv) --name $containerName
+        
+        # Output Terraform backend configuration
+        echo "backend \"azurerm\" {" > backend-config.txt
+        echo "  resource_group_name = \"$resourceGroup\"" >> backend-config.txt
+        echo "  storage_account_name = \"$storageAccountName\"" >> backend-config.txt
+        echo "  container_name = \"$containerName\"" >> backend-config.txt
+        echo "  key = \"terraform.tfstate\"" >> backend-config.txt
+        echo "}" >> backend-config.txt
+        
+        cat backend-config.txt
+    name: 'Create Terraform backend'
+    arguments: '--Location "$(Location)" --ResourceGroupName "$(ResourceGroupName)" --StorageAccountName "$(StorageAccountName)" --ContainerName "$(ContainerName)"'
 
   - task: TerraformTaskV1@0
     displayName: Terraform init
@@ -32,7 +72,12 @@ steps:
       provider: 'azurerm'
       command: 'init'
       workingDirectory: '$(terraformFolder)'
-      
+      command: 'init'
+      workingDirectory: '$(terraformFolder)'
+      backendServiceArm: "$(cat backend-config.txt)"
+      # backendAzureRmStorageAccountName: '$(tf-backend-sa-name)'
+      # backendAzureRmContainerName: '$(tf-backend-container-name)'
+      # backendAzureRmKey: '$(tf-backend-key)'
   - task: TerraformTaskV1@0
     displayName: Terraform validate
     inputs:
@@ -45,7 +90,7 @@ steps:
     inputs:
       provider: 'azurerm'
       command: 'plan'
-      environmentServiceNameAzureRM: 'assessment'
+      environmentServiceNameAzureRM: '$(service-connection)'
       workingDirectory: '$(terraformFolder)'
 
   - task: TerraformTaskV1@0
@@ -53,7 +98,7 @@ steps:
     inputs:
       provider: 'azurerm'
       command: 'apply'
-      environmentServiceNameAzureRM: 'assessment'
+      environmentServiceNameAzureRM: '$(service-connection)'
       workingDirectory: '$(terraformFolder)'
       args: '-auto-approve'
 

@@ -18,16 +18,17 @@ provider "azurerm" {
   features {}
 }
 
-# Create a resource group
-resource "azurerm_resource_group" "resource1" {
-  name     = "adasd"
-  location = "West Europe"
+resource "azurerm_resource_group" "resource_group" {
+  name     = "assessment_resource_grp"
+  location = "East US"
 }
 
+resource "azurerm_container_registry" "acr" {
+  name                = var.container_registry
+  resource_group_name = azurerm_resource_group.example.name
+  location            = azurerm_resource_group.example.location
+  sku                 = "Premium"
+  admin_enabled       = false
 
-resource "azurerm_resource_group" "resource2" {
-  name     = "adad"
-  location = "West Europe"
 }
-
 

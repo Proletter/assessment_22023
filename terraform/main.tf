@@ -20,18 +20,18 @@ provider "azurerm" {
 
 # Create a resource group
 resource "azurerm_resource_group" "resource1" {
-  name     = "old"
+  name     = "adasd"
   location = "West Europe"
 }
 
 
 resource "azurerm_resource_group" "resource2" {
-  name     = "new"
+  name     = "adad"
   location = "West Europe"
 }
 
 
 resource "azurerm_resource_group" "resource3" {
-  name     = "third"
+  name     = "aaxx"
   location = "West Europe"
 }

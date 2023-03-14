@@ -24,9 +24,14 @@ variables:
     value: "eastus2"
  
 
-trigger:
-- master
 
+trigger:
+  branches:
+    include:
+      - master
+  paths:
+    include:
+      - src/main/js
 pool:
   vmImage: ubuntu-latest
 

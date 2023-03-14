@@ -6,7 +6,7 @@ storageAccountName=$2
 location=$3
 containerName="tfstate"
 
-az account import --name "assessment"
+az login
 
 # Check if storage account already exists
 if az storage account check-name --name $storageAccountName --query 'nameAvailable' | grep -q false; then

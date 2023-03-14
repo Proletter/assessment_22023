@@ -30,60 +30,21 @@ steps:
       versionSpec: '3.9'
       architecture: 'x64'
   
-  - task: TerraformInstaller@0
-    displayName: Install Terraform
+  - task: Bash@3
     inputs:
-      terraformVersion: '1.1.4'
-  
-  - task: AzurePowerShell@5
-    inputs:
-      azureSubscription: '$(service-connection)'
-      ScriptType: 'InlineScript'
-      azurePowerShellVersion: LatestVersion
-      Inline: |
-        $resourceGroupName = '$(ResourceGroupName)'
-        $storageAccountName = '$(StorageAccountName)'
-        $containerName = '$(ContainerName)'
-        $location = 'eastus2'
-        
-        # Create resource group
-        New-AzResourceGroup -Name $resourceGroupName -Location $location
-        
-        # Create storage account
-        $storageAccount = New-AzStorageAccount -ResourceGroupName $resourceGroupName -Name $storageAccountName -Location $location -SkuName 'Standard_LRS' -Kind 'StorageV2' -EnableHttpsTrafficOnly $true -AccessTier 'Hot' -MinimumTlsVersion 'TLS1_2' -AllowBlobPublicAccess $false
-        
-        # Create container
-        $ctx = $storageAccount.Context
-        New-AzStorageContainer -Name $containerName -Context $ctx
-    displayName: 'Create Terraform backend'
-  - task: PowerShell@2
-    inputs:
-      targetType: 'inline'
-      script: |
-        $resourceGroupName = '<your-resource-group>'
-        $storageAccountName = '<your-storage-account-name>'
-        $containerName = '<your-container-name>'
-        
-        $config = @{
-          backend = 'azurerm'
-          config = @{
-            resource_group_name = $resourceGroupName
-            storage_account_name = $storageAccountName
-            container_name = $containerName
-            key = 'terraform.tfstate'
-          }
-        }
-        $config | ConvertTo-Json -Depth 100 | Out-File -FilePath '$(Build.ArtifactStagingDirectory)/backend-config.json'
-    displayName: 'Output Terraform backend configuration'
-  - task: TerraformTaskV1@0
-    inputs:
-      provider: 'azurerm'
-      command: 'init'
-      backendType: 'AzureRM'
-      backendConfig: '$(System.DefaultWorkingDirectory)/_backend-config/backend-config.json'
-      workingDirectory: '$(terraformFolder)'
-    displayName: 'Terraform init'
-
+      filePath: './terraform/create_backend.sh'
+      arguments: '$(ResourceGroupName) $(StorageAccountName) $(Location)'
+  -
+- task: TerraformTaskV4@4
+  inputs:
+    provider: 'azurerm'
+    workingDirectory: "./$(terraformFolder)"
+    command: 'init'
+    backendServiceArm: $(service-connection)
+    backendAzureRmResourceGroupName: $(pipeline.backend_resource_group)
+    backendAzureRmContainerName: $(pipeline.backend_container)
+    backendAzureRmKey: "terraform.tfstate"
+    backendAzureRmStorageAccountName: $(pipeline.backend_storage_account)
   # - task: TerraformTaskV1@0
   #   displayName: Terraform init
   #   inputs:

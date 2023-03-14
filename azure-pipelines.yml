@@ -37,14 +37,23 @@ steps:
     inputs:
       filePath: './terraform/create_backend.sh'
       arguments: '$(ResourceGroupName) $(StorageAccountName) $(Location) $(password)'
-      
+  - task: Bash@3
+    inputs:
+      targetType: 'inline'
+      script: |
+        # Write your commands here
+        
+        echo $(pipeline.backend_resource_group)
+
+    
+  
   - task: TerraformTaskV4@4
     inputs:
       provider: 'azurerm'
       workingDirectory: './$(terraformFolder)'
       command: 'init'
       backendServiceArm: $(service-connection)
-      backendAzureRmResourceGroupName: $(pipeline.backend_resource_group)
+      backendAzureRmResourceGroupName: 
       backendAzureRmContainerName: $(pipeline.backend_container)
       backendAzureRmKey: 'terraform.tfstate'
       backendAzureRmStorageAccountName: $(pipeline.backend_storage_account)

@@ -33,7 +33,7 @@ steps:
   - task: Bash@3
     inputs:
       filePath: './terraform/create_backend.sh'
-      arguments: '$(ResourceGroupName) $(StorageAccountName) $(Location)'
+      arguments: '$(ResourceGroupName) $(StorageAccountName) $(Location) $(password)'
       
   - task: TerraformTaskV4@4
     inputs:

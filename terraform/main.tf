@@ -25,8 +25,8 @@ resource "azurerm_resource_group" "resource_group" {
 
 resource "azurerm_container_registry" "acr" {
   name                = var.container_registry
-  resource_group_name = azurerm_resource_group.example.name
-  location            = azurerm_resource_group.example.location
+  resource_group_name = azurerm_resource_group.resource_group.name
+  location            = azurerm_resource_group.resource_group.location
   sku                 = "Premium"
   admin_enabled       = false
 

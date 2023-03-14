@@ -16,11 +16,6 @@ variables:
 # trigger:
 # - main
 
-variables:
-  imageName: myimage
-  registryName: myregistry.azurecr.io
-  tag: $(Build.BuildId)
-
 pool:
   vmImage: 'ubuntu-latest'
 

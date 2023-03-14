@@ -13,7 +13,7 @@ variables:
   - name: ResourceGroupName
     value: oluseungrpnew
   - name: StorageAccountName
-    value : oluwaseunstrg
+    value : oluwaseunstrrandiii
   - name: ContainerName
     value: oluwaseuncontainer
   - name: Location

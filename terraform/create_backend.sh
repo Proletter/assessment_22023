@@ -14,6 +14,8 @@ az login --service-principal --tenant $tenantid --username $appid --password $pa
 # Check if storage account already exists
 if az storage account check-name --name $storageAccountName --query 'nameAvailable' | grep -q false; then
     echo "Storage account $storageAccountName already exists. Exiting script."
+    echo "If you are running this pipeline for the first time, please provide a unique storage account name."
+    echo "If you are running this pipeline after your first time, please ignore. Your terraform backend has already been configured."
     exit 0
 fi
 

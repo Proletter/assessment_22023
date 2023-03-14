@@ -3,6 +3,27 @@
 # Add steps that build, run tests, deploy, and more:
 # https://aka.ms/yaml
 
+variables:
+  - name: imageRepository 
+    value: azure-container-registry-name.azurecr.io
+  - name: imageName
+    value: react-app
+  - name: imageTag
+    value: $(Build.BuildId)
+  - name: terraformFolder
+    value: terraform
+  - name: service-connection
+    value: assessment
+  - name: ResourceGroupName
+    value: oluseungrpnew
+  - name: StorageAccountName
+    value : oluwaseunstrrandiii
+  - name: ContainerName
+    value: oluwaseuncontainer
+  - name: Location
+    value: "eastus2"
+ 
+
 trigger:
 - master
 

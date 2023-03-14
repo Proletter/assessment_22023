@@ -5,8 +5,11 @@ resourceGroup=$1
 storageAccountName=$2
 location=$3
 containerName="tfstate"
+password=$4
+appid="f047e138-981b-47b5-997f-669b8310f38d"
+tenantid="c579f8a6-171d-4be4-ba33-68b16a8ae922"
 
-az login
+az login --service-principal --tenant $tenantid --username $appid --password $password
 
 # Check if storage account already exists
 if az storage account check-name --name $storageAccountName --query 'nameAvailable' | grep -q false; then

@@ -31,7 +31,3 @@ resource "azurerm_resource_group" "resource2" {
 }
 
 
-resource "azurerm_resource_group" "resource3" {
-  name     = "aaxx"
-  location = "West Europe"
-}

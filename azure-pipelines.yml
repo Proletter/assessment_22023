@@ -34,7 +34,7 @@ steps:
     inputs:
       filePath: './terraform/create_backend.sh'
       arguments: '$(ResourceGroupName) $(StorageAccountName) $(Location)'
-  -
+      
   - task: TerraformTaskV4@4
     inputs:
       provider: 'azurerm'

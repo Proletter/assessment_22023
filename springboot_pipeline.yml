@@ -4,71 +4,42 @@
 # https://aka.ms/yaml
 
 variables:
-  - name: imageRepository 
+  - name: registryName 
     value: azure-container-registry-name.azurecr.io
   - name: imageName
     value: react-app
-  - name: imageTag
+  - name: tag
     value: $(Build.BuildId)
-  - name: terraformFolder
-    value: terraform
-  - name: service-connection
-    value: assessment
-  - name: ResourceGroupName
-    value: oluseungrpnew
-  - name: StorageAccountName
-    value : oluwaseunstrrandiii
-  - name: ContainerName
-    value: oluwaseuncontainer
   - name: Location
     value: "eastus2"
  
+# trigger:
+# - main
 
-
-trigger:
-  branches:
-    include:
-      - master
-  paths:
-    include:
-      - src/main/java
 pool:
-  vmImage: ubuntu-latest
+  vmImage: 'ubuntu-latest'
 
 steps:
-  - task: NodeTool@0
-    displayName: Install Node.js
-    inputs:
-      versionSpec: '16.x'
+- task: Maven@4
+  inputs:
+    mavenPomFile: 'pom.xml'
+    goals: 'clean package'
+    options: '-B'
+    publishJUnitResults: true
+    testResultsFiles: '**/surefire-reports/TEST-*.xml'
+    javaHomeOption: 'JDKVersion'
+    mavenVersionOption: 'Default'
+    mavenAuthenticateFeed: false
+    effectivePomSkip: false
+    sonarQubeRunAnalysis: false
 
-  - script: |
-      npm install
-    displayName: Install app dependencies
 
-  - script: |
-      npm run test
-    displayName: Test app
-
-  - script: |
-      npm run build
-    displayName: Build app
-
-  # - task: Docker@2
-  #   displayName: Build Docker image
-  #   inputs:
-  #     containerRegistry: $(azure-container-registry-name)
-  #     repository: $(imageRepository)/$(imageName)
-  #     command: build
-  #     Dockerfile: $(System.DefaultWorkingDirectory)/Dockerfile
-  #     tags: |
-  #       $(imageTag)
-
-  # - task: Docker@2
-  #   displayName: Push Docker image
-  #   inputs:
-  #     containerRegistry: $(azure-container-registry-name)
-  #     repository: $(imageRepository)/$(imageName)
-  #     command: push
-  #     tags: |
-  #       $(imageTag)
-
+- task: Docker@2
+  displayName: 'Build and Push Docker Image'
+  inputs:
+    containerRegistry: 'myregistry'
+    repository: '$(registryName)/$(imageName)'
+    command: 'buildAndPush'
+    Dockerfile: 'src/main/java/Dockerfile'
+    tags: |
+      $(tag)

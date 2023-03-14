@@ -41206,6 +41206,7 @@ var App = /*#__PURE__*/function (_React$Component) {
           Object.keys(schema.entity.properties).forEach(function (property) {
             if (schema.entity.properties[property].hasOwnProperty('format') && schema.entity.properties[property].format === 'uri') {
               delete schema.entity.properties[property];
+              console.log("test");
             } else if (schema.entity.properties[property].hasOwnProperty('$ref')) {
               delete schema.entity.properties[property];
             }

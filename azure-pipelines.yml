@@ -15,8 +15,14 @@ variables:
     value: oluwaseuncontainer
   - name: Location
     value: "eastus2"
+    
 trigger:
-  - master
+  branches:
+    include:
+      - master
+  paths:
+    include:
+      - src/main/js
 
 pool:
   vmImage: ubuntu-latest

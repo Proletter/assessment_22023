@@ -22,7 +22,7 @@ trigger:
       - master
   paths:
     include:
-      - terraform/
+      - terraform
 
 pool:
   vmImage: ubuntu-latest

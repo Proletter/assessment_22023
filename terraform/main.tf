@@ -23,3 +23,9 @@ resource "azurerm_resource_group" "resource2" {
   name     = "new"
   location = "West Europe"
 }
+
+
+resource "azurerm_resource_group" "resource3" {
+  name     = "third"
+  location = "West Europe"
+}

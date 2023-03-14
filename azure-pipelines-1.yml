@@ -1,0 +1,94 @@
+# azure-pipelines.yml
+variables:
+  - name: terraformFolder
+    value: terraform
+  - name: imageRepository
+    value: azure-container-registry-name.azurecr.io
+  - name: imageName
+    value: springboot-app
+  - name: imageTag
+    value: $(Build.BuildId)
+
+trigger:
+  - main
+
+pool:
+  vmImage: ubuntu-latest
+
+steps:
+  - task: UseJavaVersion@1
+    inputs:
+      versionSpec: '16'
+      architecture: 'x64'
+
+  - task: TerraformInstaller@0
+    displayName: Install Terraform
+    inputs:
+      terraformVersion: '1.1.4'
+
+  - task: TerraformTaskV1@0
+    displayName: Terraform init
+    inputs:
+      provider: 'azurerm'
+      command: 'init'
+      workingDirectory: '$(terraformFolder)'
+
+  - task: TerraformTaskV1@0
+    displayName: Terraform validate
+    inputs:
+      provider: 'azurerm'
+      command: 'validate'
+      workingDirectory: '$(terraformFolder)'
+
+  - task: TerraformTaskV1@0
+    displayName: Terraform plan
+    inputs:
+      provider: 'azurerm'
+      command: 'plan'
+      environmentServiceNameAzureRM: 'my-azure-rm-connection'
+      workingDirectory: '$(terraformFolder)'
+
+  - task: TerraformTaskV1@0
+    displayName: Terraform apply
+    inputs:
+      provider: 'azurerm'
+      command: 'apply'
+      environmentServiceNameAzureRM: 'my-azure-rm-connection'
+      workingDirectory: '$(terraformFolder)'
+      args: '-auto-approve'
+
+  - task: MavenAuthenticate@0
+    inputs:
+      artifactsFeeds: 'my-artifacts-feed'
+    displayName: Authenticate with Maven artifacts feed
+
+  - task: Maven@3
+    inputs:
+      mavenPomFile: 'pom.xml'
+      options: '-Xmx3072m'
+      goals: 'clean install'
+      publishJUnitResults: true
+      testResultsFiles: '**/TEST-*.xml'
+      javaHomeOption: 'JDKVersion'
+      jdkVersionOption: '1.16'
+      mavenAuthenticateFeed: true
+    displayName: 'Build and test Spring Boot app'
+
+  - task: Docker@2
+    displayName: Build Docker image
+    inputs:
+      containerRegistry: $(azure-container-registry-name)
+      repository: $(imageRepository)/$(imageName)
+      command: build
+      Dockerfile: $(System.DefaultWorkingDirectory)/Dockerfile
+      tags: |
+        $(imageTag)
+
+  - task: Docker@2
+    displayName: Push Docker image
+    inputs:
+      containerRegistry: $(azure-container-registry-name)
+      repository: $(imageRepository)/$(imageName)
+      command: push
+      tags: |
+        $(imageTag)

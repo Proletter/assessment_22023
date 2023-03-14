@@ -24,6 +24,7 @@ class App extends React.Component {
 		this.onNavigate = this.onNavigate.bind(this);
 		this.refreshCurrentPage = this.refreshCurrentPage.bind(this);
 		this.refreshAndGoToLastPage = this.refreshAndGoToLastPage.bind(this);
+		
 	}
 
 	loadFromServer(pageSize) {
@@ -44,6 +45,7 @@ class App extends React.Component {
 					if (schema.entity.properties[property].hasOwnProperty('format') &&
 						schema.entity.properties[property].format === 'uri') {
 						delete schema.entity.properties[property];
+						console.log("test")
 					}
 					else if (schema.entity.properties[property].hasOwnProperty('$ref')) {
 						delete schema.entity.properties[property];

@@ -40,6 +40,7 @@ steps:
     
   
   - task: TerraformTaskV4@4
+    displayName: "Initialize Terraform "
     inputs:
       provider: 'azurerm'
       workingDirectory: './$(terraformFolder)'
@@ -49,13 +50,16 @@ steps:
       backendAzureRmContainerName: "tfstate"
       backendAzureRmKey: 'terraform.tfstate'
       backendAzureRmStorageAccountName: $(StorageAccountName)
+
   - task: TerraformTaskV4@4
+    displayName: "Validate Terraform Configuration Files"
     inputs:
       provider: 'azurerm'
       command: 'validate'
       workingDirectory: './$(terraformFolder)'
 
   - task: TerraformTaskV4@4
+    displayName: "Terraform Plan"
     inputs:
       provider: 'azurerm'
       command: 'plan'
@@ -63,6 +67,7 @@ steps:
       environmentServiceNameAzureRM: 'assessment'
 
   - task: TerraformTaskV4@4
+    displayName: "Terraform Apply"
     inputs:
       provider: 'azurerm'
       command: 'apply'

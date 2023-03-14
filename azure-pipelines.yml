@@ -2,12 +2,6 @@
 variables:
   - name: terraformFolder
     value: terraform
-  - name: imageRepository
-    value: azure-container-registry-name.azurecr.io
-  - name: imageName
-    value: react-app
-  - name: imageTag
-    value: $(Build.BuildId)
   - name: service-connection
     value: assessment
   - name: ResourceGroupName

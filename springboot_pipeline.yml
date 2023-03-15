@@ -61,3 +61,9 @@ steps:
     repository: $(imageRepository)
     containerRegistry: '$(containerRegistry)'
     tags: "latest"
+- task: ManualValidation@0
+  displayName: "Approval Stage For Image Deployment To App Service"
+  timeoutInMinutes: 10 # task times out in 1 day
+  inputs:
+    notifyUsers: 'oluseun.ismaila@gmail.com'
+    instructions: 'Please approve deployment to app service'

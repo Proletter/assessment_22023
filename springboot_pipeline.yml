@@ -13,14 +13,20 @@ variables:
   - name: Location
     value: "eastus2"
  
-# trigger:
-# - main
+trigger:
+  branches:
+    include:
+      - master
+  paths:
+    exclude:
+      - terraform
 
 pool:
   vmImage: 'ubuntu-latest'
 
 steps:
 - task: Maven@4
+  displayName: "Package and Test App"
   inputs:
     mavenPomFile: 'pom.xml'
     goals: 'clean package'

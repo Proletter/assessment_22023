@@ -4,16 +4,14 @@
 # https://aka.ms/yaml
 
 variables:
-  - name: registryName 
-    value: azure-container-registry-name.azurecr.io
+  - name: containerRegistry 
+    value: "docker_service_connection"
   - name: imageName
     value: react-app
   - name: tag
     value: $(Build.BuildId)
   - name: Location
     value: "eastus2"
-  - name: service-connection
-    value: assessment
  
 trigger:
   branches:
@@ -44,19 +42,16 @@ steps:
 - task: Docker@2
   inputs:
     command: 'login'
-    containerRegistry: '$(dockerRegistryEndpoint)'
-    username: '$(dockerRegistryEndpoint.username)'
-    password: '$(dockerRegistryEndpoint.password)'
+    containerRegistry: '$(containerRegistry)'
 
 - task: Docker@2
   inputs:
     command: 'build'
     dockerfile: '**/Dockerfile'
-    tags: '$(imageName)'
-    containerRegistry: '$(dockerRegistryEndpoint)'
+    tags: '$(tag)'
+    containerRegistry: '$(containerRegistry)'
 
 - task: Docker@2
   inputs:
     command: 'push'
-    containerRegistry: '$(dockerRegistryEndpoint)'
-    imageName: '$(imageName)'
+    containerRegistry: '$(containerRegistry)'

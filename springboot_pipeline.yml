@@ -4,16 +4,20 @@
 # https://aka.ms/yaml
 
 variables:
-  - name: registryName 
-    value: azure-container-registry-name.azurecr.io
-  - name: imageName
-    value: react-app
+  - name: docker_svc_connection 
+    value: "docker_service_connection"
+  - name: imageRepository
+    value: springboot-app
   - name: tag
     value: $(Build.BuildId)
   - name: Location
     value: "eastus2"
-  - name: service-connection
-    value: assessment
+  - name: containerRegistryName
+    value: oluwaseunreg.azurecr.io
+  - name: appServiceName
+    value: Oluwaseunreg-app-service
+  - name: sub_service_connection
+    value: "assessment"
  
 trigger:
   branches:
@@ -26,37 +30,82 @@ trigger:
 pool:
   vmImage: 'ubuntu-latest'
 
-steps:
-- task: Maven@4
-  displayName: "Package and Test App"
-  inputs:
-    mavenPomFile: 'pom.xml'
-    goals: 'clean package'
-    options: '-B'
-    publishJUnitResults: true
-    testResultsFiles: '**/surefire-reports/TEST-*.xml'
-    javaHomeOption: 'JDKVersion'
-    mavenVersionOption: 'Default'
-    mavenAuthenticateFeed: false
-    effectivePomSkip: false
-    sonarQubeRunAnalysis: false
+stages:
+- stage: Test
+  jobs:
+  - job: Test
+    steps:
+      - task: Maven@4
+        displayName: "Package and Test App"
+        inputs:
+          mavenPomFile: 'pom.xml'
+          goals: 'clean package'
+          options: '-B'
+          publishJUnitResults: true
+          testResultsFiles: '**/surefire-reports/TEST-*.xml'
+          javaHomeOption: 'JDKVersion'
+          mavenVersionOption: 'Default'
+          mavenAuthenticateFeed: false
+          effectivePomSkip: false
+          sonarQubeRunAnalysis: false
+- stage: Docker
+  jobs:
+  - job: Build
+    steps:
+      - task: Docker@2
+        displayName: "Login to ACR"
+        inputs:
+          command: 'login'
+          containerRegistry: '$(docker_svc_connection)'
+      - task: Docker@2
+        displayName: "Build docker image"
+        inputs:
+          command: 'build'
+          dockerfile: '**/Dockerfile'
+          repository: $(imageRepository)
+          tags: 'latest'
+          containerRegistry: '$(docker_svc_connection)'
+      - task: Docker@2
+        displayName: "Push docker Image to ACR"
+        inputs:
+          command: 'push'
+          repository: $(imageRepository)
+          containerRegistry: '$(docker_svc_connection)'
+          tags: "latest"
+- stage: Validation
+  jobs:
+  - job: manual_approval
+    displayName: "Manual Approval"
+    pool: server
+    steps:
+    - task: ManualValidation@0
+      timeoutInMinutes: 5
+      inputs:
+        instructions: "Hi, please validate"
+        notifyUsers: "oluseun.ismaila@gmail.com"
+- stage: Deployment
+  jobs:
+  - job: deploy_to_appservice
+    displayName: "Deploying to App Service"
+    steps:
+    - task: AzureWebAppContainer@1
+      inputs:
+        azureSubscription: $(sub_service_connection)
+        appName: $(appServiceName)
+        containers: '$(containerRegistryName)/$(imageRepository):latest'
 
-- task: Docker@2
-  inputs:
-    command: 'login'
-    containerRegistry: '$(dockerRegistryEndpoint)'
-    username: '$(dockerRegistryEndpoint.username)'
-    password: '$(dockerRegistryEndpoint.password)'
+    -
 
-- task: Docker@2
-  inputs:
-    command: 'build'
-    dockerfile: '**/Dockerfile'
-    tags: '$(imageName)'
-    containerRegistry: '$(dockerRegistryEndpoint)'
 
-- task: Docker@2
-  inputs:
-    command: 'push'
-    containerRegistry: '$(dockerRegistryEndpoint)'
-    imageName: '$(imageName)'
+
+
+
+
+
+
+# - task: ManualValidation@0
+#   displayName: "Approval Stage For Image Deployment To App Service"
+#   timeoutInMinutes: 10 # task times out in 1 day
+#   inputs:
+#     notifyUsers: 'oluseun.ismaila@gmail.com'
+#     instructions: 'Please approve deployment to app service'

@@ -4,7 +4,7 @@
 # https://aka.ms/yaml
 
 variables:
-  - name: containerRegistry 
+  - name: docker_svc_connection 
     value: "docker_service_connection"
   - name: imageRepository
     value: springboot-app
@@ -12,6 +12,12 @@ variables:
     value: $(Build.BuildId)
   - name: Location
     value: "eastus2"
+  - name: containerRegistryName
+    value: oluwaseunreg.azurecr.io
+  - name: appServiceName
+    value: Oluwaseunreg-app-service
+  - name: sub_service_connection
+    value: "assessment"
  
 trigger:
   branches:
@@ -27,7 +33,7 @@ pool:
 stages:
 - stage: Test
   jobs:
-  - job: BuildJob
+  - job: Test
     steps:
       - task: Maven@4
         displayName: "Package and Test App"
@@ -44,13 +50,13 @@ stages:
           sonarQubeRunAnalysis: false
 - stage: Docker
   jobs:
-  - job: TestOnWindows
+  - job: Build
     steps:
       - task: Docker@2
         displayName: "Login to ACR"
         inputs:
           command: 'login'
-          containerRegistry: '$(containerRegistry)'
+          containerRegistry: '$(docker_svc_connection)'
       - task: Docker@2
         displayName: "Build docker image"
         inputs:
@@ -58,13 +64,13 @@ stages:
           dockerfile: '**/Dockerfile'
           repository: $(imageRepository)
           tags: 'latest'
-          containerRegistry: '$(containerRegistry)'
+          containerRegistry: '$(docker_svc_connection)'
       - task: Docker@2
         displayName: "Push docker Image to ACR"
         inputs:
           command: 'push'
           repository: $(imageRepository)
-          containerRegistry: '$(containerRegistry)'
+          containerRegistry: '$(docker_svc_connection)'
           tags: "latest"
 - stage: Validation
   jobs:
@@ -77,6 +83,18 @@ stages:
       inputs:
         instructions: "Hi, please validate"
         notifyUsers: "oluseun.ismaila@gmail.com"
+- stage: Deployment
+  jobs:
+  - job: deploy_to_appservice
+    displayName: "Deploying to App Service"
+    steps:
+    - task: AzureWebAppContainer@1
+      inputs:
+        azureSubscription: $(sub_service_connection)
+        appName: $(appServiceName)
+        containers: '$(containerRegistryName)/$(imageRepository):latest'
+
+    -
 
 
 

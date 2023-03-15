@@ -5,3 +5,4 @@ variable "container_registry" {
 variable "unique_var" {
   default ="seunismaila"
 }
+

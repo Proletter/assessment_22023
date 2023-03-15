@@ -23,24 +23,16 @@ resource "azurerm_resource_group" "resource_group" {
   location = "East US"
 }
 
+
+#Azure container registry
 resource "azurerm_container_registry" "acr" {
   name                = var.container_registry
   resource_group_name = azurerm_resource_group.resource_group.name
   location            = azurerm_resource_group.resource_group.location
   sku                 = "Premium"
-  admin_enabled       = true
+  admin_enabled       = false
 
 }
-
-# resource "azurerm_container_registry_repository" "example" {
-#   name                     = "assessment-repo"
-#   container_registry_id    = azurerm_container_registry.acr.id
-#   retention_enabled       = true
-#   retention_days          = 30
-#   retention_policy_type   = "Basic"
-#   retention_policy_blob   = "all"
-#   retention_policy_speech = "none"
-# }
 
 
 # Mysql server
@@ -64,21 +56,35 @@ resource "azurerm_mysql_server" "database" {
   ssl_enforcement_enabled           = false
 }
 
-#  Kubernetes cluster
+# App service plan
 
-resource "azurerm_kubernetes_cluster" "aks" {
-  name                = "${var.unique_var}-k8s"
+resource "azurerm_app_service_plan" "asp" {
+  name                = "${var.unique_var}-appserviceplan"
   location            = azurerm_resource_group.resource_group.location
   resource_group_name = azurerm_resource_group.resource_group.name
-  dns_prefix          = "${var.unique_var}-k8s"
 
-  default_node_pool {
-    name       = "default"
-    node_count = 1
-    vm_size    = "Standard_DS2_v2"
+  sku {
+    tier = "Standard"
+    size = "S1"
+  }
+}
+
+
+#App service
+resource "azurerm_app_service" "example" {
+  name                = "${var.unique_var}-app-service"
+  location            = azurerm_resource_group.resource_group.location
+  resource_group_name = azurerm_resource_group.resource_group.name
+  app_service_plan_id = azurerm_app_service_plan.asp.id
+
+  site_config {
+    java_version = "1.8"
+    java_container = "TOMCAT"
   }
 
-  identity {
-    type = "SystemAssigned"
+  app_settings = {
+    "SPRING_PROFILES_ACTIVE" = "prod"
+    "JAVA_OPTS" = "-Dserver.port=80"
   }
+
 }

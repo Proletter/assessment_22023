@@ -62,6 +62,7 @@ resource "azurerm_app_service_plan" "asp" {
   name                = "${var.unique_var}-appserviceplan"
   location            = azurerm_resource_group.resource_group.location
   resource_group_name = azurerm_resource_group.resource_group.name
+  kind                = "Linux"
 
   sku {
     tier = "Standard"

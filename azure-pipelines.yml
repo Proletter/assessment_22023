@@ -28,11 +28,7 @@ pool:
   vmImage: ubuntu-latest
 
 steps:
-  - task: UsePythonVersion@0
-    inputs:
-      versionSpec: '3.9'
-      architecture: 'x64'
-  
+
   - task: Bash@3
     displayName: "Setup Terraform Backend"
     inputs:

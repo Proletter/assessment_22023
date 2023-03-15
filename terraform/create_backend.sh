@@ -52,5 +52,5 @@ EOF
 
 # Set pipeline variables for backend configuration
 echo "##vso[task.setvariable variable=backend_resource_group]$resourceGroup"
-echo "##vso[task.setvariable variable=backend_storage_account]$storageAccountName"
+echo "##vso[task.setvariable variable=backend_storage_account]$storageAccountName "
 echo "##vso[task.setvariable variable=backend_container]$containerName"

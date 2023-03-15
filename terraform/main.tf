@@ -54,3 +54,22 @@ resource "azurerm_mysql_server" "database" {
   ssl_enforcement_enabled           = true
   ssl_minimal_tls_version_enforced  = "TLS1_2"
 }
+
+#  Kubernetes cluster
+
+resource "azurerm_kubernetes_cluster" "aks" {
+  name                = "${var.unique_var}-k8s"
+  location            = azurerm_resource_group.resource_group.location
+  resource_group_name = azurerm_resource_group.resource_group.name
+  dns_prefix          = "${var.unique_var}-k8s"
+
+  default_node_pool {
+    name       = "default"
+    node_count = 1
+    vm_size    = "Standard_DS2_v2"
+  }
+
+  identity {
+    type = "SystemAssigned"
+  }
+}

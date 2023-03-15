@@ -24,46 +24,71 @@ trigger:
 pool:
   vmImage: 'ubuntu-latest'
 
-steps:
-- task: Maven@4
-  displayName: "Package and Test App"
-  inputs:
-    mavenPomFile: 'pom.xml'
-    goals: 'clean package'
-    options: '-B'
-    publishJUnitResults: true
-    testResultsFiles: '**/surefire-reports/TEST-*.xml'
-    javaHomeOption: 'JDKVersion'
-    mavenVersionOption: 'Default'
-    mavenAuthenticateFeed: false
-    effectivePomSkip: false
-    sonarQubeRunAnalysis: false
+stages:
+- stage: Test App
+  jobs:
+  - job: BuildJob
+    steps:
+      - task: Maven@4
+        displayName: "Package and Test App"
+        inputs:
+          mavenPomFile: 'pom.xml'
+          goals: 'clean package'
+          options: '-B'
+          publishJUnitResults: true
+          testResultsFiles: '**/surefire-reports/TEST-*.xml'
+          javaHomeOption: 'JDKVersion'
+          mavenVersionOption: 'Default'
+          mavenAuthenticateFeed: false
+          effectivePomSkip: false
+          sonarQubeRunAnalysis: false
+- stage: Docker
+  jobs:
+  - job: TestOnWindows
+    steps:
+      - task: Docker@2
+        displayName: "Login to ACR"
+        inputs:
+          command: 'login'
+          containerRegistry: '$(containerRegistry)'
+      - task: Docker@2
+        displayName: "Build docker image"
+        inputs:
+          command: 'build'
+          dockerfile: '**/Dockerfile'
+          repository: $(imageRepository)
+          tags: 'latest'
+          containerRegistry: '$(containerRegistry)'
+      - task: Docker@2
+        displayName: "Push docker Image to ACR"
+        inputs:
+          command: 'push'
+          repository: $(imageRepository)
+          containerRegistry: '$(containerRegistry)'
+          tags: "latest"
+- stage: Deployment Validation
+  jobs:
+  - job: manual_approval
+    displayName: "Manual Approval"
+    dependsOn: terraform_init
+    pool: server
+    steps:
+    - task: ManualValidation@0
+      timeoutInMinutes: 5
+      inputs:
+        instructions: "Hi, please validate"
+        notifyUsers: "oluseun.ismaila@gmail.com"
 
-- task: Docker@2
-  displayName: "Login to ACR"
-  inputs:
-    command: 'login'
-    containerRegistry: '$(containerRegistry)'
 
-- task: Docker@2
-  displayName: "Build docker image"
-  inputs:
-    command: 'build'
-    dockerfile: '**/Dockerfile'
-    repository: $(imageRepository)
-    tags: 'latest'
-    containerRegistry: '$(containerRegistry)'
 
-- task: Docker@2
-  displayName: "Push docker Image to ACR"
-  inputs:
-    command: 'push'
-    repository: $(imageRepository)
-    containerRegistry: '$(containerRegistry)'
-    tags: "latest"
-- task: ManualValidation@0
-  displayName: "Approval Stage For Image Deployment To App Service"
-  timeoutInMinutes: 10 # task times out in 1 day
-  inputs:
-    notifyUsers: 'oluseun.ismaila@gmail.com'
-    instructions: 'Please approve deployment to app service'
+
+
+
+
+
+# - task: ManualValidation@0
+#   displayName: "Approval Stage For Image Deployment To App Service"
+#   timeoutInMinutes: 10 # task times out in 1 day
+#   inputs:
+#     notifyUsers: 'oluseun.ismaila@gmail.com'
+#     instructions: 'Please approve deployment to app service'

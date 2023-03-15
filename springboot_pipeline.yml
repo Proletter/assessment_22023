@@ -6,8 +6,8 @@
 variables:
   - name: containerRegistry 
     value: "docker_service_connection"
-  - name: imageName
-    value: react-app
+  - name: imageRepository
+    value: springboot-app
   - name: tag
     value: $(Build.BuildId)
   - name: Location
@@ -54,4 +54,5 @@ steps:
 - task: Docker@2
   inputs:
     command: 'push'
+    repository: $(imageRepository)
     containerRegistry: '$(containerRegistry)'

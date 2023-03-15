@@ -48,7 +48,7 @@ steps:
   inputs:
     command: 'build'
     dockerfile: '**/Dockerfile'
-    tags: '$(tag)'
+    tags: '$(imageRepository)'
     containerRegistry: '$(containerRegistry)'
 
 - task: Docker@2

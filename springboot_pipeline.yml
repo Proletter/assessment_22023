@@ -15,7 +15,7 @@ variables:
   - name: containerRegistryName
     value: oluwaseunreg.azurecr.io
   - name: appServiceName
-    value: Oluwaseunreg-app-service
+    value: seunismaila-app-service
   - name: sub_service_connection
     value: "assessment"
  
@@ -94,18 +94,3 @@ stages:
         appName: $(appServiceName)
         containers: '$(containerRegistryName)/$(imageRepository):latest'
 
-    -
-
-
-
-
-
-
-
-
-# - task: ManualValidation@0
-#   displayName: "Approval Stage For Image Deployment To App Service"
-#   timeoutInMinutes: 10 # task times out in 1 day
-#   inputs:
-#     notifyUsers: 'oluseun.ismaila@gmail.com'
-#     instructions: 'Please approve deployment to app service'

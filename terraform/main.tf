@@ -77,14 +77,4 @@ resource "azurerm_app_service" "example" {
   resource_group_name = azurerm_resource_group.resource_group.name
   app_service_plan_id = azurerm_app_service_plan.asp.id
 
-  site_config {
-    java_version = "1.8"
-    java_container = "TOMCAT"
-  }
-
-  app_settings = {
-    "SPRING_PROFILES_ACTIVE" = "prod"
-    "JAVA_OPTS" = "-Dserver.port=80"
-  }
-
 }

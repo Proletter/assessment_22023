@@ -15,7 +15,7 @@ variables:
   - name: containerRegistryName
     value: oluwaseunreg.azurecr.io
   - name: appServiceName
-    value: Oluwaseunreg-app-service
+    value: seunismaila-app-service
   - name: sub_service_connection
     value: "assessment"
  

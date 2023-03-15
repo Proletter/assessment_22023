@@ -28,8 +28,18 @@ resource "azurerm_container_registry" "acr" {
   resource_group_name = azurerm_resource_group.resource_group.name
   location            = azurerm_resource_group.resource_group.location
   sku                 = "Premium"
-  admin_enabled       = false
+  admin_enabled       = true
 
+}
+
+resource "azurerm_container_registry_repository" "example" {
+  name                     = "assessment-repo"
+  container_registry_id    = azurerm_container_registry.acr.id
+  retention_enabled       = true
+  retention_days          = 30
+  retention_policy_type   = "Basic"
+  retention_policy_blob   = "all"
+  retention_policy_speech = "none"
 }
 
 

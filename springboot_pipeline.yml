@@ -12,6 +12,8 @@ variables:
     value: $(Build.BuildId)
   - name: Location
     value: "eastus2"
+  - name: service-connection
+    value: assessment
  
 trigger:
   branches:
@@ -40,12 +42,3 @@ steps:
     sonarQubeRunAnalysis: false
 
 
-- task: Docker@2
-  displayName: 'Build and Push Docker Image'
-  inputs:
-    containerRegistry: 'myregistry'
-    repository: '$(registryName)/$(imageName)'
-    command: 'buildAndPush'
-    Dockerfile: 'src/main/java/Dockerfile'
-    tags: |
-      $(tag)

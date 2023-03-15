@@ -48,7 +48,7 @@ steps:
   inputs:
     command: 'build'
     dockerfile: '**/Dockerfile'
-    tags: '$(imageRepository)'
+    tags: 'latest'
     containerRegistry: '$(containerRegistry)'
 
 - task: Docker@2
@@ -56,3 +56,4 @@ steps:
     command: 'push'
     repository: $(imageRepository)
     containerRegistry: '$(containerRegistry)'
+    tags: "latest"

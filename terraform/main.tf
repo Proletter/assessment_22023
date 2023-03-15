@@ -32,15 +32,15 @@ resource "azurerm_container_registry" "acr" {
 
 }
 
-resource "azurerm_container_registry_repository" "example" {
-  name                     = "assessment-repo"
-  container_registry_id    = azurerm_container_registry.acr.id
-  retention_enabled       = true
-  retention_days          = 30
-  retention_policy_type   = "Basic"
-  retention_policy_blob   = "all"
-  retention_policy_speech = "none"
-}
+# resource "azurerm_container_registry_repository" "example" {
+#   name                     = "assessment-repo"
+#   container_registry_id    = azurerm_container_registry.acr.id
+#   retention_enabled       = true
+#   retention_days          = 30
+#   retention_policy_type   = "Basic"
+#   retention_policy_blob   = "all"
+#   retention_policy_speech = "none"
+# }
 
 
 # Mysql server

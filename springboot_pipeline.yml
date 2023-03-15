@@ -41,4 +41,22 @@ steps:
     effectivePomSkip: false
     sonarQubeRunAnalysis: false
 
+- task: Docker@2
+  inputs:
+    command: 'login'
+    containerRegistry: '$(dockerRegistryEndpoint)'
+    username: '$(dockerRegistryEndpoint.username)'
+    password: '$(dockerRegistryEndpoint.password)'
 
+- task: Docker@2
+  inputs:
+    command: 'build'
+    dockerfile: '**/Dockerfile'
+    tags: '$(imageName)'
+    containerRegistry: '$(dockerRegistryEndpoint)'
+
+- task: Docker@2
+  inputs:
+    command: 'push'
+    containerRegistry: '$(dockerRegistryEndpoint)'
+    imageName: '$(imageName)'

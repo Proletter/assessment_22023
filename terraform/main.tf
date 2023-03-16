@@ -82,10 +82,6 @@ resource "azurerm_app_service" "app_service" {
 }
 
 #Azure container app
-resource "azurerm_resource_group" "example" {
-  name     = "example-resources"
-  location = "West Europe"
-}
 
 resource "azurerm_log_analytics_workspace" "containerapp_law" {
   name                = "${var.unique_var}-law"

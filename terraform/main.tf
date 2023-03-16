@@ -103,6 +103,12 @@ resource "azurerm_container_app" "container_app" {
   resource_group_name          = azurerm_resource_group.resource_group.name
   revision_mode                = "Single"
 
+  ingress {
+    allow_insecure_connections = true
+    external_enabled = true
+    target_port = 8080
+  }
+
   template {
     container {
       name   = "examplecontainerapp"

@@ -18,6 +18,10 @@ variables:
     value: seunismaila-app-service
   - name: sub_service_connection
     value: "assessment"
+  - name: resource_group
+    value: "assessment_resource_grp"
+  - name: container_app
+    value: seunismaila-app
  
 trigger:
   branches:
@@ -88,9 +92,15 @@ stages:
   - job: deploy_to_appservice
     displayName: "Deploying to App Service"
     steps:
-    - task: AzureWebAppContainer@1
+    # - task: AzureWebAppContainer@1
+    #   inputs:
+    #     azureSubscription: $(sub_service_connection)
+    #     appName: $(appServiceName)
+    #     containers: '$(containerRegistryName)/$(imageRepository):latest'
+    - task: AzureContainerApps@0
       inputs:
         azureSubscription: $(sub_service_connection)
-        appName: $(appServiceName)
-        containers: '$(containerRegistryName)/$(imageRepository):latest'
-
+        acrName: $(containerRegistryName)
+        containerAppName: $(container_app)
+        resourceGroup: $(resource_group)
+        imageToDeploy: '$(containerRegistryName)/$(imageRepository):latest'

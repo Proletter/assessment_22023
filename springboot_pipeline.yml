@@ -92,15 +92,9 @@ stages:
   - job: deploy_to_appservice
     displayName: "Deploying to App Service"
     steps:
-    # - task: AzureWebAppContainer@1
-    #   inputs:
-    #     azureSubscription: $(sub_service_connection)
-    #     appName: $(appServiceName)
-    #     containers: '$(containerRegistryName)/$(imageRepository):latest'
-    - task: AzureContainerApps@0
+    - task: AzureWebAppContainer@1
       inputs:
-        azureSubscription: $(docker_svc_connection)
-        acrName: $(containerRegistryName)
-        containerAppName: $(container_app)
-        resourceGroup: $(resource_group)
-        imageToDeploy: '$(containerRegistryName)/$(imageRepository):latest'
+        azureSubscription: $(sub_service_connection)
+        appName: $(appServiceName)
+        containers: '$(containerRegistryName)/$(imageRepository):latest'
+

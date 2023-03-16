@@ -57,7 +57,6 @@ resource "azurerm_mysql_server" "database" {
 }
 
 # App service plan
-
 resource "azurerm_app_service_plan" "asp" {
   name                = "${var.unique_var}-appserviceplan"
   location            = azurerm_resource_group.resource_group.location

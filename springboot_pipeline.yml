@@ -99,7 +99,7 @@ stages:
     #     containers: '$(containerRegistryName)/$(imageRepository):latest'
     - task: AzureContainerApps@0
       inputs:
-        azureSubscription: $(sub_service_connection)
+        azureSubscription: $(docker_svc_connection)
         acrName: $(containerRegistryName)
         containerAppName: $(container_app)
         resourceGroup: $(resource_group)

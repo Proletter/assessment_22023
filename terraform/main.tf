@@ -80,3 +80,40 @@ resource "azurerm_app_service" "app_service" {
   app_service_plan_id = azurerm_app_service_plan.asp.id
 
 }
+
+#Azure container app
+resource "azurerm_resource_group" "example" {
+  name     = "example-resources"
+  location = "West Europe"
+}
+
+resource "azurerm_log_analytics_workspace" "containerapp_law" {
+  name                = "${var.unique_var}-law"
+  location            = azurerm_resource_group.resource_group.location
+  resource_group_name = azurerm_resource_group.resource_group.name
+  sku                 = "PerGB2018"
+  retention_in_days   = 30
+}
+
+resource "azurerm_container_app_environment" "container_app_environment" {
+  name                       = "${var.unique_var}-env"
+  location                   = azurerm_resource_group.resource_group.location
+  resource_group_name        = azurerm_resource_group.resource_group.name
+  log_analytics_workspace_id = azurerm_log_analytics_workspace.containerapp_law.id
+}
+resource "azurerm_container_app" "container_app" {
+  name                         = "${var.unique_var}-app"
+  container_app_environment_id = azurerm_container_app_environment.container_app_environment.id
+  resource_group_name          = azurerm_resource_group.resource_group.name
+  revision_mode                = "Single"
+
+  template {
+    container {
+      name   = "examplecontainerapp"
+      image  = "mcr.microsoft.com/azuredocs/containerapps-helloworld:latest"
+      cpu    = 0.25
+      memory = "0.5Gi"
+    }
+  }
+}
+

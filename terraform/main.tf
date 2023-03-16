@@ -62,6 +62,7 @@ resource "azurerm_app_service_plan" "asp" {
   location            = azurerm_resource_group.resource_group.location
   resource_group_name = azurerm_resource_group.resource_group.name
   kind                = "Linux"
+  reserved            = true
 
   sku {
     tier = "Standard"
@@ -71,7 +72,7 @@ resource "azurerm_app_service_plan" "asp" {
 
 
 #App service
-resource "azurerm_app_service" "example" {
+resource "azurerm_app_service" "app_service" {
   name                = "${var.unique_var}-app-service"
   location            = azurerm_resource_group.resource_group.location
   resource_group_name = azurerm_resource_group.resource_group.name

@@ -20,8 +20,8 @@ variables:
     value: "assessment"
   - name: imagePullSecret
     value: "image_secret"
-  - name: k8sNamespace
-    value: 
+  - name: k8s_service_connection
+    value: k8s_service_connection
  
 trigger:
   branches:
@@ -89,25 +89,28 @@ stages:
         notifyUsers: "oluseun.ismaila@gmail.com"
 - stage: Deployment
   jobs:
-  - job: deploy_to_appservice
-    displayName: "Deploying to App Service"
+  - job: deploy_to_kubernetes
+    displayName: "Deploying to Kubernetes"
     steps:
       - task: KubernetesManifest@0
-        displayName: Create imagePullSecret
         inputs:
-          action: createSecret
-          secretName: $(imagePullSecret)
-          dockerRegistryEndpoint: $(dockerRegistryServiceConnection)
+          action: 'createSecret'
+          kubernetesServiceConnection: 'k8s_service_connection'
+          secretType: 'dockerRegistry'
+          secretName: '$(imagePullSecret)'
+          dockerRegistryEndpoint: 'docker_service_connection'
+
 
       - task: KubernetesManifest@0
         displayName: Deploy to Kubernetes cluster
         inputs:
           action: deploy
+          kubernetesServiceConnection: 'k8s_service_connection'
           manifests: |
             ./manifests/deployment.yml
             ./manifests/service.yml
           imagePullSecrets: |
-            $(imagePullSecret)
+           '$(imagePullSecret)'
           containers: |
             $(containerRegistryName)/$(imageRepository):latest'
 
@@ -120,3 +123,10 @@ stages:
   #       azureSubscription: $(sub_service_connection)
   #       appName: $(appServiceName)
   #       containers: '$(containerRegistryName)/$(imageRepository):latest'
+ 
+
+
+
+
+
+    

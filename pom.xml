@@ -55,12 +55,12 @@
 		<dependency>
 			<groupId>com.h2database</groupId>
 			<artifactId>h2</artifactId>
-			<scope>test</scope>
+			<!-- <scope>test</scope> -->
 		</dependency>
-		<dependency>
+		<!-- <dependency>
 			<groupId>mysql</groupId>
     		<artifactId>mysql-connector-java</artifactId>
-		</dependency>
+		</dependency> -->
 	</dependencies>
 
 	<build>

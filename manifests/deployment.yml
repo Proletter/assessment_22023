@@ -14,7 +14,7 @@ spec:
     spec:
       containers:
       - name: my-spring-app-container
-        image: REPLACE_ME
+        image: oluwaseunreg.azurecr.io/springboot-app:latest
         ports:
         - containerPort: 8080
           

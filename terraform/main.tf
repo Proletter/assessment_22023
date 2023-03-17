@@ -93,6 +93,8 @@ resource "azurerm_kubernetes_cluster" "aks" {
     vm_size    = "Standard_D2_v2"
   }
 
+  dns_prefix = "${var.unique_var}prefix"
+
   identity {
     type = "SystemAssigned"
   }

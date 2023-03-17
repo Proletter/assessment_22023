@@ -107,8 +107,8 @@ stages:
           action: deploy
           kubernetesServiceConnection: 'k8s_service_connection'
           manifests: |
-            ./manifests/deployment.yml
-            ./manifests/service.yml
+            manifests/deployment.yml
+            manifests/service.yml
           imagePullSecrets: |
            '$(imagePullSecret)'
           containers: |

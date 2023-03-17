@@ -36,7 +36,7 @@ To see the frontend, navigate to http://localhost:8080. You are immediately redi
 The solution to the assessment has two parts. An infrastructure pipeline and a pipeline that deploys the app.
 
 ## Architect Diagram
-![ScreenShot](/screenshots/Architecture_Diagram.png)
+![ScreenShot](/screenshots/ArchitectureDiagram.png)
 ## infrastructure pipeline
 The infrastructure pipeline simply runs a terraform config file to create the required infrastructure for the application.
 

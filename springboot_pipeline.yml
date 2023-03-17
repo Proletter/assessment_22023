@@ -113,8 +113,8 @@ stages:
           action: deploy
           kubernetesServiceConnection: 'k8s_service_connection'
           manifests: |
-            '$(Build.SourcesDirectory)/manifests/deployment.yml'
-            '$(Build.SourcesDirectory)/manifests/service.yml'
+             $(Build.SourcesDirectory)/manifests/deployment.yml
+             $(Build.SourcesDirectory)/manifests/service.yml
           imagePullSecrets: |
            '$(imagePullSecret)'
           containers: |

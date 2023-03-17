@@ -18,6 +18,10 @@ variables:
     value: seunismaila-app-service
   - name: sub_service_connection
     value: "assessment"
+  - name: imagePullSecret
+    value: "image_secret"
+  - name: k8sNamespace
+    value: 
  
 trigger:
   branches:
@@ -88,9 +92,31 @@ stages:
   - job: deploy_to_appservice
     displayName: "Deploying to App Service"
     steps:
-    - task: AzureWebAppContainer@1
-      inputs:
-        azureSubscription: $(sub_service_connection)
-        appName: $(appServiceName)
-        containers: '$(containerRegistryName)/$(imageRepository):latest'
+      - task: KubernetesManifest@0
+        displayName: Create imagePullSecret
+        inputs:
+          action: createSecret
+          secretName: $(imagePullSecret)
+          dockerRegistryEndpoint: $(dockerRegistryServiceConnection)
 
+      - task: KubernetesManifest@0
+        displayName: Deploy to Kubernetes cluster
+        inputs:
+          action: deploy
+          manifests: |
+            ./manifests/deployment.yml
+            ./manifests/service.yml
+          imagePullSecrets: |
+            $(imagePullSecret)
+          containers: |
+            $(containerRegistryName)/$(imageRepository):latest'
+
+
+  # - job: deploy_to_appservice
+  #   displayName: "Deploying to App Service"
+  #   steps:
+  #   - task: AzureWebAppContainer@1
+  #     inputs:
+  #       azureSubscription: $(sub_service_connection)
+  #       appName: $(appServiceName)
+  #       containers: '$(containerRegistryName)/$(imageRepository):latest'

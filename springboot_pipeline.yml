@@ -18,6 +18,10 @@ variables:
     value: seunismaila-app-service
   - name: sub_service_connection
     value: "assessment"
+  - name: imagePullSecret
+    value: "my-secret"
+  - name: k8s_service_connection
+    value: k8s_service_connection
  
 trigger:
   branches:
@@ -85,12 +89,44 @@ stages:
         notifyUsers: "oluseun.ismaila@gmail.com"
 - stage: Deployment
   jobs:
-  - job: deploy_to_appservice
-    displayName: "Deploying to App Service"
+  - job: deploy_to_kubernetes
+    displayName: "Deploying to Kubernetes"
     steps:
-    - task: AzureWebAppContainer@1
-      inputs:
-        azureSubscription: $(sub_service_connection)
-        appName: $(appServiceName)
-        containers: '$(containerRegistryName)/$(imageRepository):latest'
+      - task: KubernetesManifest@0
+        inputs:
+          action: 'createSecret'
+          kubernetesServiceConnection: 'k8s_service_connection'
+          secretType: 'dockerRegistry'
+          secretName: '$(imagePullSecret)'
+          dockerRegistryEndpoint: 'docker_service_connection'
 
+
+      - task: KubernetesManifest@0
+        displayName: Deploy to Kubernetes cluster
+        inputs:
+          action: deploy
+          kubernetesServiceConnection: 'k8s_service_connection'
+          manifests: |
+            ./manifests/deployment.yml
+            ./manifests/service.yml
+          imagePullSecrets: |
+           '$(imagePullSecret)'
+          containers: |
+            $(containerRegistryName)/$(imageRepository):latest'
+
+
+  # - job: deploy_to_appservice
+  #   displayName: "Deploying to App Service"
+  #   steps:
+  #   - task: AzureWebAppContainer@1
+  #     inputs:
+  #       azureSubscription: $(sub_service_connection)
+  #       appName: $(appServiceName)
+  #       containers: '$(containerRegistryName)/$(imageRepository):latest'
+ 
+
+
+
+
+
+    

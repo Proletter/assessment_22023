@@ -55,7 +55,7 @@ To create a service connection go to the project settings and click here:
 
 ## Service Connection Example
 
-![App Screenshot](https://via.placeholder.com/468x300?text=App+Screenshot+Here)
+![ScreenShot](/screenshots/example.png)
 
 
 The required service connections to make the pipelines work are:

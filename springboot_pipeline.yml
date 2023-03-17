@@ -92,6 +92,8 @@ stages:
   - job: deploy_to_kubernetes
     displayName: "Deploying to Kubernetes"
     steps:
+      - checkout: self
+
       - task: KubernetesManifest@0
         inputs:
           action: 'createSecret'
@@ -99,7 +101,9 @@ stages:
           secretType: 'dockerRegistry'
           secretName: '$(imagePullSecret)'
           dockerRegistryEndpoint: 'docker_service_connection'
-
+          
+      - script: dir $(Build.SourcesDirectory)/manifests
+        displayName: Cloning Manifest Files From Repo
 
       - task: KubernetesManifest@0
         displayName: Deploy to Kubernetes cluster

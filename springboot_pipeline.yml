@@ -87,7 +87,7 @@ stages:
     - task: ManualValidation@0
       timeoutInMinutes: 5
       inputs:
-        instructions: "Hi, please validate"
+        instructions: "Hi, please validate, this request times out in 5 minutes"
         notifyUsers: "oluseun.ismaila@gmail.com"
 - stage: Deployment
   jobs:
@@ -97,6 +97,7 @@ stages:
       - checkout: self
 
       - task: KubernetesManifest@0
+        displayName: Create Image Pull Secret
         inputs:
           action: 'createSecret'
           kubernetesServiceConnection: 'k8s_service_connection'

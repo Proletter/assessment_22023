@@ -118,7 +118,7 @@ stages:
           imagePullSecrets: |
            '$(imagePullSecret)'
           containers: |
-            $(containerRegistryName)/$(imageRepository):latest'
+            $(containerRegistryName)/$(imageRepository):latest
 
 
   # - job: deploy_to_appservice

@@ -14,6 +14,7 @@ spec:
     spec:
       containers:
       - name: my-spring-app-container
+        image: REPLACE_ME
         ports:
         - containerPort: 8080
-          image: REPLACE_ME
+          

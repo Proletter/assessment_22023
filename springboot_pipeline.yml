@@ -2,6 +2,8 @@
 # Start with a minimal pipeline that you can customize to build and deploy your code.
 # Add steps that build, run tests, deploy, and more:
 # https://aka.ms/yaml
+resources:
+- repo: self
 
 variables:
   - name: docker_svc_connection 
@@ -92,6 +94,8 @@ stages:
   - job: deploy_to_kubernetes
     displayName: "Deploying to Kubernetes"
     steps:
+      - checkout: self
+
       - task: KubernetesManifest@0
         inputs:
           action: 'createSecret'
@@ -99,7 +103,9 @@ stages:
           secretType: 'dockerRegistry'
           secretName: '$(imagePullSecret)'
           dockerRegistryEndpoint: 'docker_service_connection'
-
+          
+      # - script: dir $(Build.SourcesDirectory)/manifests
+      #   displayName: Cloning Manifest Files From Repo
 
       - task: KubernetesManifest@0
         displayName: Deploy to Kubernetes cluster
@@ -107,8 +113,8 @@ stages:
           action: deploy
           kubernetesServiceConnection: 'k8s_service_connection'
           manifests: |
-            ./manifests/deployment.yml
-            ./manifests/service.yml
+             $(Build.SourcesDirectory)/manifests/deployment.yml
+             $(Build.SourcesDirectory)/manifests/service.yml
           imagePullSecrets: |
            '$(imagePullSecret)'
           containers: |

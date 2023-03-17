@@ -57,30 +57,7 @@ resource "azurerm_mysql_server" "database" {
   ssl_minimal_tls_version_enforced  = "TLS1_2"
 }
 
-# App service plan
-resource "azurerm_app_service_plan" "asp" {
-  name                = "${var.unique_var}-appserviceplan"
-  location            = azurerm_resource_group.resource_group.location
-  resource_group_name = azurerm_resource_group.resource_group.name
-  kind                = "Linux"
-  reserved            = true
-
-  sku {
-    tier = "Standard"
-    size = "S1"
-  }
-}
-
-
-#App service
-resource "azurerm_app_service" "app_service" {
-  name                = "${var.unique_var}-app-service"
-  location            = azurerm_resource_group.resource_group.location
-  resource_group_name = azurerm_resource_group.resource_group.name
-  app_service_plan_id = azurerm_app_service_plan.asp.id
-
-}
-
+# Kubernetes
 
 resource "azurerm_kubernetes_cluster" "aks" {
   name                = "${var.unique_var}-aks"

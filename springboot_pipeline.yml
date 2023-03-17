@@ -19,7 +19,7 @@ variables:
   - name: sub_service_connection
     value: "assessment"
   - name: imagePullSecret
-    value: "image_secret"
+    value: "my-secret"
   - name: k8s_service_connection
     value: k8s_service_connection
  
